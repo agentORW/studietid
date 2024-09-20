@@ -155,6 +155,17 @@ app.get('/getusers/', (req, resp) => {
     resp.send(users)
 })
 
+app.get('/getAllActivity/', (req, resp) => {
+    console.log('/getusers/')
+
+    const sql = db.prepare('SELECT user.id as userid, firstname, lastname, role.name  as role ' + 
+        'FROM user inner join role on user.idrole = role.id ');
+    let users = sql.all()   
+    console.log("users.length", users.length)
+    
+    resp.send(users)
+})
+
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {
