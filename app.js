@@ -155,17 +155,20 @@ app.get('/getusers/', (req, resp) => {
     resp.send(users)
 })
 
-app.get('/getAllActivity/', (req, resp) => {
-    console.log('/getusers/')
+// Function to get all registered activity
+app.get('/getactivity/', (req, resp) => {
+    console.log('/getactivity/')
 
-    const sql = db.prepare('SELECT user.id as userid, firstname, lastname, role.name  as role ' + 
-        'FROM user inner join role on user.idrole = role.id ');
-    let users = sql.all()   
-    console.log("users.length", users.length)
+    const sql = db.prepare('SELECT activity.id as activityID, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, room.name as room, status.name as status, activity.duration from activity ' +
+        'inner join user on activity.idUser = user.id ' +
+        'inner join room on activity.idRoom = room.id ' +
+        'inner join status on activity.idStatus = status.id;'
+    );
+    let activity = sql.all()   
+    console.log("activity.length", activity.length)
     
-    resp.send(users)
+    resp.send(activity)
 })
-
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {

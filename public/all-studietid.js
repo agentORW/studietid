@@ -5,7 +5,7 @@ function displayAllStudietid() {
 async function fetchStudieTid() {
     try {
         // Fetch API brukes for å hente data fra URLen
-        let response = await fetch('/getusers/'); // Hente brukere fra studietidDB
+        let response = await fetch('/getactivity/'); // Hente brukere fra studietidDB
         let data = await response.json(); // Konverterer responsen til JSON
 
         // Nå må vi iterere gjennom data.results, ikke data direkte
@@ -17,3 +17,5 @@ async function fetchStudieTid() {
         console.error('Error:', error); // Håndterer eventuelle feil
     }
 }
+
+displayAllStudietid(); // Kjører funksjonen for å hente data fra studietidDB
