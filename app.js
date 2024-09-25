@@ -10,9 +10,8 @@ app.use(express.json()); // To parse JSON bodies
 
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(staticPath, 'app.html'))
+    res.sendFile(path.join(staticPath, './info/index.html'))
 })
-
 
 function checkValidEmailFormat(email) {
 
