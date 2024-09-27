@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Study Time</title>
+    <link rel="stylesheet" href="min-studietid.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#">Info</a></li>
+            <li><a href="#">Vis all studietid</a></li>
+            <li><a href="#">Min studietid</a></li>
+            <li><a href="#">Logg ut</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Registrer studietid</h1>
+        
+        <div class="form">
+            <form id="registerForm" action="/addactivity" method="POST">
+                <select id="subject" name="subject">
+                    <option>Velg fag</option>
+                    <option value="Mattematikk">Mattematikk</option>
+                </select>
+                <select id="room" name="room">
+                    <option>Velg rom</option>
+                    <option value="352">352</option>
+                </select>
+                <button type="submit" >Registrer ny studietime</button>
+            </form>
+        </div>
+
+        <h2>Mine studietimer</h2>
+        <p>Du har x registrerte studietimer</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Dato og tid</th>
+                    <th>Rom</th>
+                    <th>Tid brukt</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Empty table rows -->
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

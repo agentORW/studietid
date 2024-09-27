@@ -169,6 +169,35 @@ app.get('/getactivity/', (req, resp) => {
     resp.send(activity)
 })
 
+// Function to register new activity
+app.post('/addactivity', (req, res) => {
+    const { idUser, idRoom, idStatus, startTime, duration } = req.body;
+
+    // Insert new activity
+    const newActivity = addActivity(idUser, idRoom, idStatus, startTime, duration);
+
+    if (!newActivity) {
+        return res.json({ error: 'Failed to register activity.' });
+    }
+
+    return res.json({ message: 'Activity registered successfully!', activity: newActivity });
+});
+
+function addActivity(idUser, idRoom, idStatus, startTime, duration) {
+    sql = db.prepare("INSERT INTO activity (idUser, startTime, idSubject, idStatus, duration) " +
+                         "values (?, ?, ?, ?, ?)")
+    const info = sql.run(idUser, idRoom, idStatus, startTime, duration)
+    
+    sql = db.prepare('SELECT activity.id as activityID, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, room.name as room, status.name as status, activity.duration from activity ' +
+        'inner join user on activity.idUser = user.id ' +
+        'inner join room on activity.idRoom = room.id ' +
+        'inner join status on activity.idStatus = status.id WHERE activity.id = ?');
+    let rows = sql.all(info.lastInsertRowid)  
+    console.log('row inserted', rows[0])
+
+    return rows[0]
+}
+
 app.use(express.static(staticPath));
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
