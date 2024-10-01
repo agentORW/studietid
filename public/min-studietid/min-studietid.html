@@ -22,14 +22,12 @@
         <div class="form">
             <form id="registerForm" action="/addactivity" method="POST">
                 <select id="subject" name="subject">
-                    <option>Velg fag</option>
-                    <option value="Mattematikk">Mattematikk</option>
+                    <option value="">Velg fag</option>
                 </select>
                 <select id="room" name="room">
-                    <option>Velg rom</option>
-                    <option value="352">352</option>
+                    <option value="">Velg rom</option>
                 </select>
-                <button type="submit" >Registrer ny studietime</button>
+                <button id="btn" type="submit">Registrer ny studietime</button>
             </form>
         </div>
 
@@ -60,4 +58,5 @@
         </table>
     </div>
 </body>
+<script src="min-studietid.js"></script>
 </html>

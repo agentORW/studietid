@@ -172,15 +172,15 @@ app.get('/getactivity/', (req, resp) => {
 // Function to register new activity
 app.post('/addactivity', (req, res) => {
     const { idUser, idRoom, idStatus, startTime, duration } = req.body;
+        // Insert new activity
+        const newActivity = addActivity(idUser, idRoom, idStatus, startTime, duration);
 
-    // Insert new activity
-    const newActivity = addActivity(idUser, idRoom, idStatus, startTime, duration);
+        if (!newActivity) {
+            return res.json({ error: 'Failed to register activity.' });
+        }
 
-    if (!newActivity) {
-        return res.json({ error: 'Failed to register activity.' });
-    }
-
-    return res.json({ message: 'Activity registered successfully!', activity: newActivity });
+        return res.json({ message: 'Activity registered successfully!', activity: newActivity });
+   
 });
 
 function addActivity(idUser, idRoom, idStatus, startTime, duration) {
@@ -197,6 +197,24 @@ function addActivity(idUser, idRoom, idStatus, startTime, duration) {
 
     return rows[0]
 }
+
+app.get('/getsubjects', (req, res) => { 
+    const sql = db.prepare('SELECT * FROM subject');
+    let subjects = sql.all()   
+    console.log("subjects.length", subjects.length)
+    
+    res.send(subjects)
+})
+
+//Function to get all registered rooms
+app.get('/getrooms', (req, res) => {
+    const sql = db.prepare('SELECT * FROM room');
+    let rooms = sql.all()   
+    console.log("rooms.length", rooms.length)
+    
+    res.send(rooms)
+})
+
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {
