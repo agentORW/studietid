@@ -158,10 +158,10 @@ app.get('/getusers/', (req, resp) => {
 app.get('/getactivity/', (req, resp) => {
     console.log('/getactivity/')
 
-    const sql = db.prepare('SELECT activity.id as activityID, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, room.name as room, status.name as status, activity.duration from activity ' +
-        'inner join user on activity.idUser = user.id ' +
+    const sql = db.prepare('SELECT activity.idUser as idUser, activity.startTime as startTime, subject.name as subject, room.name as room, activity.duration as duration, status.name as status from activity ' +
         'inner join room on activity.idRoom = room.id ' +
-        'inner join status on activity.idStatus = status.id;'
+        'inner join status on activity.idStatus = status.id ' +
+        'inner join subject on activity.idSubject = subject.id '
     );
     let activity = sql.all()   
     console.log("activity.length", activity.length)
@@ -171,9 +171,9 @@ app.get('/getactivity/', (req, resp) => {
 
 // Function to register new activity
 app.post('/addactivity', (req, res) => {
-    const { idUser, idRoom, idStatus, startTime, duration } = req.body;
+    const { idUser, startTime, idSubject, idRoom, idStatus, duration } = req.body;
         // Insert new activity
-        const newActivity = addActivity(idUser, idRoom, idStatus, startTime, duration);
+        const newActivity = addActivity(idUser, startTime, idSubject, idRoom, idStatus, duration);
 
         if (!newActivity) {
             return res.json({ error: 'Failed to register activity.' });
@@ -183,10 +183,10 @@ app.post('/addactivity', (req, res) => {
    
 });
 
-function addActivity(idUser, idRoom, idStatus, startTime, duration) {
-    sql = db.prepare("INSERT INTO activity (idUser, startTime, idSubject, idStatus, duration) " +
-                         "values (?, ?, ?, ?, ?)")
-    const info = sql.run(idUser, idRoom, idStatus, startTime, duration)
+function addActivity(idUser, startTime, idSubject, idRoom, idStatus, duration) {
+    sql = db.prepare("INSERT INTO activity (idUser, startTime, idSubject, idRoom, idStatus, duration) " +
+                         "values (?, ?, ?, ?, ?, ?)")
+    const info = sql.run(idUser, startTime, idSubject, idRoom, idStatus, duration)
     
     sql = db.prepare('SELECT activity.id as activityID, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, room.name as room, status.name as status, activity.duration from activity ' +
         'inner join user on activity.idUser = user.id ' +
