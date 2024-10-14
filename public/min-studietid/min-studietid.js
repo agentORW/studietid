@@ -135,10 +135,6 @@ async function displayUserActivity () {
     
 }
 
-function test (){
-    console.log('test')
-}
-
 populateSubjects()
 populateRooms()
 displayUserActivity()
