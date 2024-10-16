@@ -31,16 +31,14 @@ async function displayUserActivity () {
         // Nå må vi iterere gjennom data.results, ikke data direkte
         for (let i = 0; i < data.length; i++) {
             console.log(data[i]);
-            if (data[i].idUser == tempUserId) {
                 let row = `<tr>
-                            <td>${data}</td>
+                            <td>${data[i].firstName} ${data[i].lastName}</td>
                             <td>${data[i].subject}
                             <td>${data[i].room}</td>
                             <td>${data[i].duration}</td>
                             <td>${data[i].status}</td>
                         </tr>`;
                 tableBody.innerHTML += row; // Legger til raden
-            }
         }
 
         table.innerHTML += tableBody.innerHTML; // Legger til body i tabellen

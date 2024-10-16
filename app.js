@@ -3,13 +3,20 @@ const path = require('path')
 const db = sqlite3('./studietid.db', {verbose: console.log})
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const express = require('express')
+const express = require('express');
+const { hash } = require('crypto');
 const app = express()
 
 const staticPath = path.join(__dirname, 'public')
 app.use(express.urlencoded({ extended: true })) // To parse urlencoded parameters
 app.use(express.json()); // To parse JSON bodies
 
+app.use(session({
+    secret: 'hemmelig_nøkkel',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Sett til true hvis du bruker HTTPS
+}));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(staticPath, './info/index.html'))
@@ -163,10 +170,11 @@ app.get('/getusers/', (req, resp) => {
 app.get('/getactivity/', (req, resp) => {
     console.log('/getactivity/')
 
-    const sql = db.prepare('SELECT activity.idUser as idUser, activity.startTime as startTime, subject.name as subject, room.name as room, activity.duration as duration, status.name as status from activity ' +
+    const sql = db.prepare('SELECT activity.idUser as idUser, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, subject.name as subject, room.name as room, activity.duration as duration, status.name as status from activity ' +
         'inner join room on activity.idRoom = room.id ' +
         'inner join status on activity.idStatus = status.id ' +
-        'inner join subject on activity.idSubject = subject.id '
+        'inner join subject on activity.idSubject = subject.id ' +
+        'inner join user on activity.idUser = user.id'
     );
     let activity = sql.all()   
     console.log("activity.length", activity.length)
@@ -226,12 +234,6 @@ function getUserByEmail(email) {
     return sql.get(email);
 }
 
-// Get first name by email
-function getFirstNameByEmail(email) {
-    const sql = db.prepare('SELECT firstName FROM user WHERE email = ?');
-    return sql.get(email);
-}
-
 // Get hashed password by email
 function getHashedPasswordByEmail(email) {
     const sql = db.prepare('SELECT password FROM user WHERE email = ?');
@@ -243,37 +245,23 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
     // Finn brukeren basert på brukernavn
-    const user = getUserByEmail(email) //hent bruker fra databasen basert på brukernavn
+    const user = getUserByEmail(email)//hent bruker fra databasen basert på brukernavn
+    console.log(user)
     
     if (!user) {
-        return res.status(401).send('Ugyldig epost eller passord');
+        return res.status(401).send('Ugyldig email eller passord');
     }
 
-
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-
-    const hashedPassword = await bcrypt.hash(user.password, salt, (err, hash) => {
-        if (err) {
-            // Handle error
-            return;
-        }
-    
-    // Hashing successful, 'hash' contains the hashed password
-    console.log('Hashed password:', hash);
-    });
-
     // Sjekk om passordet samsvarer med hash'en i databasen
-    const isMatch = await bcrypt.compare(hashedPassword, getFirstNameByEmail(user.email));
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
         // Lagre innloggingsstatus i session
         req.session.loggedIn = true;
-        req.session.email = user.email;
-        req.session.username = getFirstNameByEmail(user.email);
-        return res.send('Innlogging vellykket!');
+        req.session.username = user.firstName;
+        return res.send(`Innlogging vellykket! Velkommen ${req.session.username}`);
     } else {
-        return res.status(401).send('Ugyldig brukernavn eller passord');
+        return res.status(401).send('Ugyldig email eller passord');
     }
 });
 
