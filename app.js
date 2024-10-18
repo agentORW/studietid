@@ -18,7 +18,16 @@ app.use(session({
     cookie: { secure: false } // Sett til true hvis du bruker HTTPS
 }));
 
-app.get('/', (req, res) => {
+// Function to check if user is logged in
+function checkLoggedIn(req, res, next) {
+    if (req.session.loggedIn) {
+        next();
+    } else {
+        res.redirect('./logg-inn/logg-inn.html');
+    }
+}
+
+app.get('/', checkLoggedIn, (req, res) => {
     res.sendFile(path.join(staticPath, './info/index.html'))
 })
 
@@ -102,8 +111,7 @@ function checkEmailregex(email) {
     if (!result) {
         return false;
     }
-
-
+    return true;
 }
 
 
@@ -234,12 +242,6 @@ function getUserByEmail(email) {
     return sql.get(email);
 }
 
-// Get hashed password by email
-function getHashedPasswordByEmail(email) {
-    const sql = db.prepare('SELECT password FROM user WHERE email = ?');
-    return sql.get(email);
-}
-
 // Rute for innlogging
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -258,8 +260,9 @@ app.post('/login', async (req, res) => {
     if (isMatch) {
         // Lagre innloggingsstatus i session
         req.session.loggedIn = true;
-        req.session.username = user.firstName;
-        return res.send(`Innlogging vellykket! Velkommen ${req.session.username}`);
+        req.session.firstName = user.firstName;
+        req.session.lastName = user.lastName;
+        return res.redirect('/')
     } else {
         return res.status(401).send('Ugyldig email eller passord');
     }
@@ -268,12 +271,15 @@ app.post('/login', async (req, res) => {
 // Beskyttet rute som krever at brukeren er innlogget
 app.get('/dashboard', (req, res) => {
     if (req.session.loggedIn) {
-        res.send(`Velkommen, ${req.session.username}!`);
+        res.send(`Velkommen, ${req.session.firstName}!`);
     } else {
         res.status(403).send('Du må være logget inn for å se denne siden.');
     }
 });
 
+app.get('/all-studietid', (req, res) => {
+    res.sendFile(path.join(staticPath, './all-studietid/all-studietid.html'))
+});
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {

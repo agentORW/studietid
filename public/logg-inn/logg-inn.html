@@ -1,9 +1,21 @@
-<form action="/login" method="POST">
-    <label for="email">E-post:</label>
-    <input type="text" id="email" name="email" required>
-    
-    <label for="password">Passord:</label>
-    <input type="password" id="password" name="password" required>
-    
-    <button type="submit">Logg inn</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logg Inn</title>
+    <link rel="stylesheet" href="../globalstyle.css">
+    <link rel="stylesheet" href="../logg-inn/logg-inn.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>LOGG INN</h1>
+        <form action="/login" method="POST">
+            <input type="text" id="email" name="email" placeholder="E-post" required>
+            <input type="password" id="password" name="password" placeholder="Passord" required>
+            <button type="submit">LOGG INN</button>
+        </form>
+        <p>Har du ikke en konto? <a href="gog">Registrer</a></p>
+    </div>
+</body>
+</html>
