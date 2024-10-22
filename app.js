@@ -256,12 +256,13 @@ app.post('/login', async (req, res) => {
 
     // Sjekk om passordet samsvarer med hash'en i databasen
     const isMatch = await bcrypt.compare(password, user.password);
-
+    console.log("User role: ", user.idRole, typeof user.idRole)
     if (isMatch) {
         // Lagre innloggingsstatus i session
         req.session.loggedIn = true;
         req.session.firstName = user.firstName;
         req.session.lastName = user.lastName;
+        req.session.isAdmin = user.isAdmin;
         return res.redirect('/')
     } else {
         return res.status(401).send('Ugyldig email eller passord');
@@ -277,11 +278,52 @@ app.get('/dashboard', (req, res) => {
     }
 });
 
-app.get('/all-studietid', (req, res) => {
+// Function to check if user is admin with a sql request
+function checkIsAdmin(req, res, next) {
+    if (req.session.isAdmin) {
+        next();
+    } else {
+        res.redirect('/logg-inn/logg-inn.html');
+    }
+}
+
+app.get('/all-studietid/', checkLoggedIn, checkIsAdmin, (req, res) => {
     res.sendFile(path.join(staticPath, './all-studietid/all-studietid.html'))
+});
+
+app.get('/min-studietid/', checkLoggedIn, (req, res) => {
+    res.sendFile(path.join(staticPath, './min-studietid/min-studietid.html'))
+});
+
+// Function to get navbar
+app.get('/navbar', (req, res) => {
+    let navBar = document.createElement('nav');
+
+    let info = document.createElement('li');
+    info.innerHTML = `
+        <a href="` + staticPath + `/info">Info</a>
+        `;
+    navBar.appendChild(info);
+
+    if (req.session.isAdmin === 1) {
+        let allStudietid = document.createElement('li');
+        allStudietid.innerHTML = `
+            <a href="` + staticPath + `/all-studietid">All Studietid</a>
+            `;
+        navBar.appendChild(allStudietid);
+    }
+
+    let minStudietid = document.createElement('li');
+    minStudietid.innerHTML = `
+        <a href="` + staticPath + `/min-studietid">Min Studietid</a>
+        `;
+    navBar.appendChild(minStudietid);
+
+    return navBar;
 });
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
+    console.log(staticPath);
 })
