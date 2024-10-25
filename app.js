@@ -5,6 +5,7 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const express = require('express');
 const { hash } = require('crypto');
+const { type } = require('os');
 const app = express()
 
 const staticPath = path.join(__dirname, 'public')
@@ -28,7 +29,7 @@ function checkLoggedIn(req, res, next) {
 }
 
 app.get('/', checkLoggedIn, (req, res) => {
-    res.sendFile(path.join(staticPath, './info/index.html'))
+    res.redirect('/info')
 })
 
 function checkValidEmailFormat(email) {
@@ -85,6 +86,19 @@ function checkValidEmailFormat(email) {
     if (domainName.startsWith('-') || domainName.endsWith('-')) {
         return false;
     }
+
+    // switch (true) {
+    //     case parts.length !== 2:
+    //     case localPart.length === 0 || domainPart.length === 0:
+    //     case !domainPart.includes('.'):
+    //     case domainParts.length < 2:
+    //     case !domainName || !domainExtension:
+    //     case domainExtension.length < 2:
+    //     case localPart.startsWith('.') || localPart.endsWith('.'):
+    //     case domainName.startsWith('-') || domainName.endsWith('-'):
+    //         return false;
+    // }
+
 
     // If all checks pass, return true
     return true;
@@ -174,6 +188,11 @@ app.get('/getusers/', (req, resp) => {
     resp.send(users)
 })
 
+app.get('/getcurrentuser', (req, resp) => {
+    console.log("This is the current user: ", req.session.userId, typeof req.session.userId)
+    resp.send({id: req.session.userId});
+})
+
 // Function to get all registered activity
 app.get('/getactivity/', (req, resp) => {
     console.log('/getactivity/')
@@ -219,6 +238,7 @@ function addActivity(idUser, startTime, idSubject, idRoom, idStatus, duration) {
     return rows[0]
 }
 
+
 app.get('/getsubjects', (req, res) => { 
     const sql = db.prepare('SELECT * FROM subject');
     let subjects = sql.all()   
@@ -259,6 +279,7 @@ app.post('/login', async (req, res) => {
     console.log("User role: ", user.idRole, typeof user.idRole)
     if (isMatch) {
         // Lagre innloggingsstatus i session
+        req.session.userId = user.id;
         req.session.loggedIn = true;
         req.session.firstName = user.firstName;
         req.session.lastName = user.lastName;
@@ -295,8 +316,32 @@ app.get('/min-studietid/', checkLoggedIn, (req, res) => {
     res.sendFile(path.join(staticPath, './min-studietid/min-studietid.html'))
 });
 
+app.get('/info/', checkLoggedIn, (req, res) => {
+    res.sendFile(path.join(staticPath, './info/info.html'))
+})
+
 // Function to get navbar
-app.get('/navbar', (req, res) => {
+app.get('/getnavbar', (req, res) => {
+    let navBar = {}
+    navBarList = []
+    let adress = "http://localhost:3000"
+
+    navBarList.push({name: 'Info', link: `${adress}/info`})
+
+    switch (true) {
+        case req.session.isAdmin === 1:
+            navBarList.push({name: 'All Studietid', link: `${adress}/all-studietid`})
+        case req.session.loggedIn:
+            navBarList.push({name: 'Min Studietid', link: `${adress}/min-studietid`})
+    }
+
+    navBarList.push({name: 'Logg ut', link: path.join(staticPath, '/logg-ut/logg-ut.html')})
+
+    navBar.navBarList = navBarList;
+
+    return res.send(navBar);
+
+/*
     let navBar = document.createElement('nav');
 
     let info = document.createElement('li');
@@ -320,6 +365,7 @@ app.get('/navbar', (req, res) => {
     navBar.appendChild(minStudietid);
 
     return navBar;
+    */
 });
 
 app.use(express.static(staticPath));

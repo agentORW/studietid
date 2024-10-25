@@ -1,4 +1,4 @@
-const tempUserId = 1;
+
 
 const regForm = document.getElementById('registerForm')
 regForm.addEventListener('submit', addactivity)
@@ -8,13 +8,16 @@ regForm.addEventListener('submit', addactivity)
 
     const subject = document.getElementById('subject')
     const room = document.getElementById('room')
+    const userIdreq = await fetch('/getcurrentuser');
+    const userIdjson = await userIdreq.json();
+    const userId = userIdjson.id;
 
     if (subject.value == "" || room.value == "") {
         alert('Fyll ut alle feltene.');
 
     } else {
         const user = {
-            idUser: 1,
+            idUser: userId,
             startTime: "2024-09-01 08:00:00",
             idSubject: Number(subject.value),
             idRoom: Number(room.value),
@@ -34,7 +37,7 @@ regForm.addEventListener('submit', addactivity)
             if (data.error) {
                 alert(data.error)
             } else {
-                alert("User registered successfully!")
+                alert("Activity registered successfully!")
             }
         } catch (error) {
             alert("En feil oppstod. Prøv igjen.")
@@ -88,6 +91,10 @@ async function populateRooms() {
 
 async function displayUserActivity () {
     try {
+        const userIdreq = await fetch('/getcurrentuser');
+        const userIdjson = await userIdreq.json();
+        const userId = userIdjson.id;
+
         const response = await fetch('/getactivity');
         const data = await response.json();
 
@@ -115,7 +122,7 @@ async function displayUserActivity () {
         // Nå må vi iterere gjennom data.results, ikke data direkte
         for (let i = 0; i < data.length; i++) {
             console.log(data[i]);
-            if (data[i].idUser == tempUserId) {
+            if (data[i].idUser == userId) {
                 let row = `<tr>
                             <td>${data[i].startTime}</td>
                             <td>${data[i].subject}
