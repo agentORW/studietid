@@ -1,6 +1,22 @@
-const tempUserId = 1;
+//import { generateNavBar } from "../globalfunctions";
+document.title = "Info";
+async function generateNavBar() {
+    const navbarreq = await fetch('/getnavbar');
+    const navbarjson = await navbarreq.json();
+    const navbar = navbarjson.navBarList;
 
+    const navbarDoc = document.getElementById('navlist');
+    navbarDoc.innerHTML = "";
+    navbar.forEach(element => {
+        let navButton = document.createElement('li');
+        navButton.innerHTML = `<a href="${element.link}">${element.name}</a>`;
+        navbarDoc.appendChild(navButton);
+    });
+    console.log("navbar", navbar)
+}
 
+generateNavBar()
+console.log("This is the index.js file for the info page"); // This will log the message to the console
 
 async function displayUserActivity () {
     try {
@@ -27,18 +43,22 @@ async function displayUserActivity () {
         table.innerHTML += tableHead;
 
         let tableBody = document.createElement('tbody');
-
         // Nå må vi iterere gjennom data.results, ikke data direkte
         for (let i = 0; i < data.length; i++) {
             console.log(data[i]);
-                let row = `<tr>
+            if (data[i].statusId == 1) {
+                let row = `<tr name=${data[i].id}>
                             <td>${data[i].firstName} ${data[i].lastName}</td>
                             <td>${data[i].subject}
                             <td>${data[i].room}</td>
                             <td>${data[i].duration}</td>
-                            <td>${data[i].status}</td>
+                            <td>
+                            <button class="confirm" onclick="updateStatus(${data[i].id}, 3)">Bekreft</button> 
+                            <button class="cancel" onclick="updateStatus(${data[i].id}, 1)">Annuler</button>
+                            </td>
                         </tr>`;
                 tableBody.innerHTML += row; // Legger til raden
+            }
         }
 
         table.innerHTML += tableBody.innerHTML; // Legger til body i tabellen
@@ -47,6 +67,32 @@ async function displayUserActivity () {
         console.error('Error:', error);
     }
     
+}
+
+function updateStatus (activityID, newStatus) {
+    console.log("activityID", activityID)
+    console.log("newStatus", newStatus)
+
+    fetch('/updatestatus', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            activityID: activityID,
+            newStatus: newStatus
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        displayUserActivity();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+
+    displayUserActivity()
 }
 
 displayUserActivity()

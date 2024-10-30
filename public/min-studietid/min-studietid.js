@@ -1,4 +1,22 @@
 
+//import { generateNavBar } from "../globalfunctions";
+document.title = "Info";
+async function generateNavBar() {
+    const navbarreq = await fetch('/getnavbar');
+    const navbarjson = await navbarreq.json();
+    const navbar = navbarjson.navBarList;
+
+    const navbarDoc = document.getElementById('navlist');
+    navbarDoc.innerHTML = "";
+    navbar.forEach(element => {
+        let navButton = document.createElement('li');
+        navButton.innerHTML = `<a href="${element.link}">${element.name}</a>`;
+        navbarDoc.appendChild(navButton);
+    });
+    console.log("navbar", navbar)
+}
+
+generateNavBar()
 
 const regForm = document.getElementById('registerForm')
 regForm.addEventListener('submit', addactivity)
@@ -21,7 +39,7 @@ regForm.addEventListener('submit', addactivity)
             startTime: "2024-09-01 08:00:00",
             idSubject: Number(subject.value),
             idRoom: Number(room.value),
-            idStatus: 1,
+            idStatus: 2,
             duration: 90
         };
 
@@ -128,7 +146,7 @@ async function displayUserActivity () {
                             <td>${data[i].subject}
                             <td>${data[i].room}</td>
                             <td>${data[i].duration}</td>
-                            <td>${data[i].status}</td>
+                            <td>${data[i].statusName}</td>
                         </tr>`;
                 tableBody.innerHTML += row; // Legger til raden
             }

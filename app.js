@@ -28,7 +28,7 @@ function checkLoggedIn(req, res, next) {
     }
 }
 
-app.get('/', checkLoggedIn, (req, res) => {
+app.get('/', (req, res) => {
     res.redirect('/info')
 })
 
@@ -197,7 +197,7 @@ app.get('/getcurrentuser', (req, resp) => {
 app.get('/getactivity/', (req, resp) => {
     console.log('/getactivity/')
 
-    const sql = db.prepare('SELECT activity.idUser as idUser, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, subject.name as subject, room.name as room, activity.duration as duration, status.name as status from activity ' +
+    const sql = db.prepare('SELECT activity.id as id, activity.idUser as idUser, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, subject.name as subject, room.name as room, activity.duration as duration, status.name as statusName, activity.idStatus as statusId from activity ' +
         'inner join room on activity.idRoom = room.id ' +
         'inner join status on activity.idStatus = status.id ' +
         'inner join subject on activity.idSubject = subject.id ' +
@@ -290,6 +290,11 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.get('/logg-ut', (req, res) => {
+    req.session.destroy();
+    res.redirect('/info/info.html');
+})
+
 // Beskyttet rute som krever at brukeren er innlogget
 app.get('/dashboard', (req, res) => {
     if (req.session.loggedIn) {
@@ -316,7 +321,7 @@ app.get('/min-studietid/', checkLoggedIn, (req, res) => {
     res.sendFile(path.join(staticPath, './min-studietid/min-studietid.html'))
 });
 
-app.get('/info/', checkLoggedIn, (req, res) => {
+app.get('/info', (req, res) => {
     res.sendFile(path.join(staticPath, './info/info.html'))
 })
 
@@ -333,9 +338,14 @@ app.get('/getnavbar', (req, res) => {
             navBarList.push({name: 'All Studietid', link: `${adress}/all-studietid`})
         case req.session.loggedIn:
             navBarList.push({name: 'Min Studietid', link: `${adress}/min-studietid`})
+            navBarList.push({name: 'Logg ut', link: `/logg-ut`})
     }
 
-    navBarList.push({name: 'Logg ut', link: path.join(staticPath, '/logg-ut/logg-ut.html')})
+    if (req.session.loggedIn === undefined) {
+        navBarList.push({name: 'Logg inn', link: `${adress}/logg-inn/logg-inn.html`})
+        console.log("This is the session: ", req.session.loggedIn)
+    }
+            
 
     navBar.navBarList = navBarList;
 
@@ -367,6 +377,33 @@ app.get('/getnavbar', (req, res) => {
     return navBar;
     */
 });
+
+app.post('/updatestatus', (req, res) => {
+    const { activityID, newStatus } = req.body;
+
+    // Update status
+    const updatedActivity = updateStatus(activityID, newStatus);
+
+    if (!updatedActivity) {
+        return res.json({ error: 'Failed to update status.' });
+    }
+
+    return res.json({ message: 'Status updated successfully!', activity: updatedActivity });
+});
+
+function updateStatus(activityID, newStatus) {
+    const sql = db.prepare("UPDATE activity SET idStatus = ? WHERE id = ?")
+    const info = sql.run(newStatus, activityID)
+    
+    sql = db.prepare('SELECT activity.id as activityID, user.firstName as firstName, user.lastName as lastName, activity.startTime as startTime, room.name as room, status.name as status, activity.duration from activity ' +
+        'inner join user on activity.idUser = user.id ' +
+        'inner join room on activity.idRoom = room.id ' +
+        'inner join status on activity.idStatus = status.id WHERE activity.id = ?');
+    let rows = sql.all(activityID)  
+    console.log('row updated', rows[0])
+
+    return rows[0]
+}
 
 app.use(express.static(staticPath));
 app.listen(3000, () => {

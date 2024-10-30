@@ -5,7 +5,8 @@ async function generateNavBar() {
     const navbarjson = await navbarreq.json();
     const navbar = navbarjson.navBarList;
 
-    const navbarDoc = document.querySelector('ul');
+    const navbarDoc = document.getElementById('navlist');
+    navbarDoc.innerHTML = "";
     navbar.forEach(element => {
         let navButton = document.createElement('li');
         navButton.innerHTML = `<a href="${element.link}">${element.name}</a>`;
