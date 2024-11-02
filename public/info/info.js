@@ -16,4 +16,3 @@ async function generateNavBar() {
 }
 
 generateNavBar()
-console.log("This is the index.js file for the info page"); // This will log the message to the console

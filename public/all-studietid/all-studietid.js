@@ -12,18 +12,14 @@ async function generateNavBar() {
         navButton.innerHTML = `<a href="${element.link}">${element.name}</a>`;
         navbarDoc.appendChild(navButton);
     });
-    console.log("navbar", navbar)
 }
 
 generateNavBar()
-console.log("This is the index.js file for the info page"); // This will log the message to the console
 
 async function displayUserActivity () {
     try {
         const response = await fetch('/getactivity');
         const data = await response.json();
-
-        console.log("activities.length", data.length)
 
         let table = document.getElementById('activityTable'); // Henter tabellen fra HTML
 
@@ -45,8 +41,7 @@ async function displayUserActivity () {
         let tableBody = document.createElement('tbody');
         // Nå må vi iterere gjennom data.results, ikke data direkte
         for (let i = 0; i < data.length; i++) {
-            console.log(data[i]);
-            if (data[i].statusId == 1) {
+            if (data[i].statusId == 2) {
                 let row = `<tr name=${data[i].id}>
                             <td>${data[i].firstName} ${data[i].lastName}</td>
                             <td>${data[i].subject}
@@ -70,8 +65,6 @@ async function displayUserActivity () {
 }
 
 function updateStatus (activityID, newStatus) {
-    console.log("activityID", activityID)
-    console.log("newStatus", newStatus)
 
     fetch('/updatestatus', {
         method: 'POST',
@@ -85,7 +78,6 @@ function updateStatus (activityID, newStatus) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Success:', data);
         displayUserActivity();
     })
     .catch((error) => {

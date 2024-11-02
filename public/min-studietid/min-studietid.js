@@ -13,7 +13,6 @@ async function generateNavBar() {
         navButton.innerHTML = `<a href="${element.link}">${element.name}</a>`;
         navbarDoc.appendChild(navButton);
     });
-    console.log("navbar", navbar)
 }
 
 generateNavBar()
@@ -71,7 +70,6 @@ async function populateSubjects() {
         const response = await fetch('/getsubjects');
         const subjects = await response.json();
 
-        console.log("subjects.length", subjects.length)
 
         const subjectList = document.getElementById('subject')
         subjects.forEach(subject => {
@@ -92,7 +90,6 @@ async function populateRooms() {
         const response = await fetch('/getrooms');
         const rooms = await response.json();
 
-        console.log("rooms.length", rooms.length)
 
         const roomList = document.getElementById('room')
         rooms.forEach(room => {
@@ -116,8 +113,6 @@ async function displayUserActivity () {
         const response = await fetch('/getactivity');
         const data = await response.json();
 
-        console.log("activities.length", data.length)
-
         let table = document.getElementById('activityTable'); // Henter tabellen fra HTML
 
         table.innerHTML = ""; // Nullstiller tabellen
@@ -139,7 +134,6 @@ async function displayUserActivity () {
 
         // Nå må vi iterere gjennom data.results, ikke data direkte
         for (let i = 0; i < data.length; i++) {
-            console.log(data[i]);
             if (data[i].idUser == userId) {
                 let row = `<tr>
                             <td>${data[i].startTime}</td>
