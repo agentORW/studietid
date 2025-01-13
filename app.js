@@ -129,8 +129,8 @@ function checkEmailregex(email) {
 }
 
 
-app.post('/adduser', (req, res) => {
-    const { firstName, lastName, email } = req.body;
+app.post('/adduser', checkLoggedIn, checkIsAdmin, (req, res) => {
+    const { firstName, lastName, email, password } = req.body;
 
     // Validate email format and check if email already exists
     if (!checkValidEmailFormat(email)) {
@@ -162,8 +162,8 @@ function addUser(firstName, lastName, idRole, isAdmin, email)
  {
 
 
-    sql = db.prepare("INSERT INTO user (firstName, lastName, idRole, isAdmin, email) " +
-                         "values (?, ?, ?, ?, ?)")
+    sql = db.prepare("INSERT INTO user (firstName, lastName, idRole, isAdmin, email, password) " +
+                         "values (?, ?, ?, ?, ?, ?)")
     const info = sql.run(firstName, lastName, idRole, isAdmin, email)
     
     sql = db.prepare('SELECT user.id as userid, firstname, lastname, role.name  as role ' + 
@@ -174,7 +174,7 @@ function addUser(firstName, lastName, idRole, isAdmin, email)
     return rows[0]
 }
 
-app.get('/getusers/', (req, resp) => {
+app.get('/getusers/', checkLoggedIn, (req, resp) => {
     console.log('/getusers/')
 
     const sql = db.prepare('SELECT user.id as userid, firstname, lastname, role.name as role ' + 
@@ -188,7 +188,7 @@ app.get('/getusers/', (req, resp) => {
     resp.send(users)
 })
 
-app.get('/getcurrentuser', (req, resp) => {
+app.get('/getcurrentuser', checkLoggedIn, (req, resp) => {
     console.log("This is the current user: ", req.session.userId, typeof req.session.userId)
     resp.send({id: req.session.userId});
 })
@@ -210,7 +210,7 @@ app.get('/getactivity/', (req, resp) => {
 })
 
 // Function to register new activity
-app.post('/addactivity', (req, res) => {
+app.post('/addactivity', checkLoggedIn, (req, res) => {
     const { idUser, startTime, idSubject, idRoom, idStatus, duration } = req.body;
         // Insert new activity
         const newActivity = addActivity(idUser, startTime, idSubject, idRoom, idStatus, duration);
@@ -239,7 +239,7 @@ function addActivity(idUser, startTime, idSubject, idRoom, idStatus, duration) {
 }
 
 
-app.get('/getsubjects', (req, res) => { 
+app.get('/getsubjects', checkLoggedIn, (req, res) => { 
     const sql = db.prepare('SELECT * FROM subject');
     let subjects = sql.all()   
     console.log("subjects.length", subjects.length)
@@ -248,7 +248,7 @@ app.get('/getsubjects', (req, res) => {
 })
 
 //Function to get all registered rooms
-app.get('/getrooms', (req, res) => {
+app.get('/getrooms', checkLoggedIn, (req, res) => {
     const sql = db.prepare('SELECT * FROM room');
     let rooms = sql.all()   
     console.log("rooms.length", rooms.length)
@@ -284,13 +284,19 @@ app.post('/login', async (req, res) => {
         req.session.firstName = user.firstName;
         req.session.lastName = user.lastName;
         req.session.isAdmin = user.isAdmin;
-        return res.redirect('/')
+        
+        if (user.isAdmin === 1) {
+            return res.redirect('/all-studietid');
+        } else {
+            return res.redirect('/min-studietid');
+        }
+        
     } else {
         return res.status(401).send('Ugyldig email eller passord');
     }
 });
 
-app.get('/logg-ut', (req, res) => {
+app.get('/logg-ut', checkLoggedIn, (req, res) => {
     req.session.destroy();
     res.redirect('/info/info.html');
 })
@@ -378,7 +384,7 @@ app.get('/getnavbar', (req, res) => {
     */
 });
 
-app.post('/updatestatus', (req, res) => {
+app.post('/updatestatus', checkLoggedIn, checkIsAdmin, (req, res) => {
     const { activityID, newStatus } = req.body;
 
     // Update status

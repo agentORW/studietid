@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logg Inn</title>
+    <link rel="stylesheet" href="../globalstyle.css">
+    <link rel="stylesheet" href="../registrer/registrer.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>REGISTRER</h1>
+        <form action="/adduser" method="POST">
+            <input type="text" id="firstname" name="firstname" placeholder="Fornavn" required>
+            <input type="text" id="lastname" name="lastname" placeholder="Etternavn" required>
+            <input type="text" id="email" name="email" placeholder="E-post" required>
+            <input type="password" id="password" name="password" placeholder="Passord" required>
+            <button type="submit">REGISTRER</button>
+        </form>
+    </div>
+</body>
+</html>
